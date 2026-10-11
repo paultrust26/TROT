@@ -2,13 +2,13 @@
 
 📄 **Paper:** [OpenReview](https://openreview.net/forum?id=OgkJ87Gu35&noteId=OgkJ87Gu35)
 
-![TROT pipeline](figures/pipeline.png)
-
-*Figure: TROT pipeline. Each observation passes through three layers in cost order: a deterministic compressor (zero cost), a learned gate (near-zero cost), and an auxiliary LLM used selectively. The agent sees the result, and the history compressor feeds back into the next step.*
-
 ## Abstract
 
 LLM coding agents accumulate large observation histories, including conversations, reasoning traces, tool calls, and tool outputs, causing context windows to grow and inference costs to increase. We present TROT (Triage of Observation Tokens), a hierarchical framework that selectively compresses and removes stale observations using deterministic rules, a lightweight learned gate, and an auxiliary LLM only when needed. On SWE-bench Verified across two model families, TROT achieves the highest task success while substantially reducing context size. It attains a 50.6% resolve rate with 55% token savings on Sonnet-4.6 and a 46.1% resolve rate with 46% token savings on Devstral-24B, while requiring 6× fewer auxiliary LLM calls than uniform LLM-based reflection.
+
+![TROT pipeline](figures/pipeline.png)
+
+*Figure: TROT pipeline. Each observation passes through three layers in cost order: a deterministic compressor (zero cost), a learned gate (near-zero cost), and an auxiliary LLM used selectively. The agent sees the result, and the history compressor feeds back into the next step.*
 
 ## Method
 
@@ -55,4 +55,4 @@ TROT is the only method that achieves both the highest resolve rate and the larg
 
 ## License
 
-Code license to be added.
+MIT. See [LICENSE](LICENSE).
