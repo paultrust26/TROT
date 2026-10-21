@@ -1,0 +1,80 @@
+# Configuration for run_trot.py. Paths are relative to the repository root.
+# Every value below is the setting used for the paper's runs.
+#
+# API credentials come from the environment, never from this file:
+#   OPENAI_API_KEY    key for your model provider
+#   OPENAI_BASE_URL   optional, base URL of a provider with an OpenAI compatible API
+
+# ---------------------------------------------------------------------------
+# Data and output
+# ---------------------------------------------------------------------------
+tasks: data/tasks.jsonl          # built by scripts/prepare_tasks.py
+output: results/results.jsonl    # one line per (task, method), appended and resumable
+testbed_dir: testbeds            # repository checkouts, one per task
+
+# ---------------------------------------------------------------------------
+# Agent (shared by every method)
+# ---------------------------------------------------------------------------
+model: gpt-4.1                   # agent model, as named by your provider
+reflect_model: gpt-4.1-mini      # auxiliary model for AgentDiet and TROT reflection
+max_steps: 50                    # agent step budget per task
+max_output_tokens: 4096          # cap on tokens per agent response
+
+# ---------------------------------------------------------------------------
+# Methods. Remove a method to skip it.
+# ---------------------------------------------------------------------------
+methods:
+  baseline: {}                   # full observations, no compression
+
+  truncation:
+    max_chars: 3000              # characters kept from each observation (start and error tail)
+
+  sliding_window:
+    window_size: 8               # observations older than this many steps are masked
+
+  taco: {}                       # fixed rule set with a critical observation bypass
+
+  agent_diet:
+    a: 2                         # at step s, reduce the observation of step s - a
+    b: 1                         # steps of context before the target given to the reflection model
+    theta: 500                   # skip reflection on observations shorter than this many tokens
+
+  trot:
+    # Layer 1: deterministic rules
+    post_edit_protection: 2      # steps after an edit served in full; the code raises values below 5 to 5
+    tight_critical_bypass: false # true: veto only genuine test failures and tracebacks
+
+    # Layer 2: learned gate
+    gate:
+      enabled: true
+      risk_threshold: 0.15       # maximum predicted risk allowed when choosing a cheaper tier
+
+    # Layer 3: selective reflection with the auxiliary model
+    reflection:
+      a: 2                       # at step s, reduce the observation of step s - a
+      b: 1                       # steps of context before the target given to the reflection model
+      theta: 3000                # skip reflection on observations shorter than this many tokens
+      max_calls: 5               # reflection calls allowed per task
+
+    # History compression
+    history:
+      enabled: true
+      recency_window: 5          # the most recent steps are never compressed
+      min_tokens_to_compress: 200  # leave observations shorter than this alone
+      age_decay_threshold: 15    # observations older than this many steps decay to a stub
+
+    # Progress nudges and spin detection
+    nudges:
+      start_step: 15             # first step at which a progress nudge may be sent
+      interval: 8                # steps between nudges
+      max_nudges: 3              # nudges allowed per task
+    spin_detector:
+      repeat_threshold: 3        # repeated identical actions before the agent is nudged
+      max_nudges: 2              # spin nudges allowed per task
+
+    # Submit gate
+    submit_gate: true            # run the failing tests before accepting a submit
+
+    # Ablations, as switches. Leave all empty for the full method.
+    ablations: []                # any of: no_gate, no_critical_bypass, no_submit_gate,
+                                 #         no_history_compress, no_reflection

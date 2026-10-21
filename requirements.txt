@@ -1,0 +1,10 @@
+openai>=1.30          # model calls, through any provider with an OpenAI compatible API
+pyyaml>=6.0           # configuration file
+numpy>=1.24           # gate features
+tiktoken>=0.5         # token counting
+xgboost==3.1.2        # learned gate models (trot/models/*.pkl were saved with this version)
+scikit-learn==1.7.2   # gate calibration (same version as the saved models)
+datasets>=2.18        # scripts/prepare_tasks.py: SWE-smith from the Hugging Face Hub
+
+# Optional: static embeddings for extra gate features. TROT runs without it.
+# model2vec>=0.3
